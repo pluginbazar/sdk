@@ -3,6 +3,7 @@
  * Pluginbazar SDK Client
  *
  * @version 1.0.0
+ * @author Pluginbazar
  */
 
 namespace Pluginbazar;
