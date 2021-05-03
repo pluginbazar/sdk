@@ -101,7 +101,7 @@ class Notifications {
 	 */
 	private function set_cached_notification_data( $value ) {
 		if ( $value ) {
-			set_transient( $this->cache_key, $value, 3 * HOUR_IN_SECONDS );
+			set_transient( $this->cache_key, $value, 24 * HOUR_IN_SECONDS );
 		}
 	}
 
