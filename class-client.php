@@ -50,7 +50,6 @@ class Client {
 		add_action( 'admin_init', array( $this, 'manage_permanent_dismissible' ) );
 
 		self::notifications();
-		self::updater();
 	}
 
 
