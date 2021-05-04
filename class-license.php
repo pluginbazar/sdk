@@ -25,9 +25,28 @@ class License {
 	 */
 	function __construct() {
 
-		$this->option_key = sprintf( 'pb_%s_license_data', Client::$_text_domain );
+		$this->option_key = sprintf( 'pb_%s_license_data', md5( Client::$_text_domain ) );
 		$this->cache_key  = sprintf( 'pb_%s_version_info', md5( Client::$_text_domain ) );
 		$this->data       = get_option( $this->option_key, array() );
+
+		add_action( 'admin_notices', array( $this, 'license_activation_notices' ) );
+	}
+
+
+	/**
+	 * Send message if License is not valid
+	 */
+	function license_activation_notices() {
+
+		if ( $this->is_valid() || ( isset( $_GET['page'] ) && sanitize_text_field( $_GET['page'] == $this->menu_args['menu_slug'] ) ) ) {
+			return;
+		}
+
+		$license_message = sprintf( Client::__trans( '<p>You must activate <strong>%s</strong> to unlock the premium features, enable single-click download, and etc. Dont have your key? <a href="%s" target="_blank">Your license keys</a></p><p><a class="button-primary" href="%s">Activate License</a></p>' ),
+			Client::$_plugin_name, sprintf( '%s/my-account/license-keys/', $this->license_server ), menu_page_url( $this->menu_args['menu_slug'], false )
+		);
+
+		Client::print_notice( $license_message, 'warning' );
 	}
 
 
@@ -117,7 +136,6 @@ class License {
 			return;
 		}
 
-
 		// Sending request to server
 		$api_params = array(
 			'slm_action'        => $license_action,
@@ -125,10 +143,13 @@ class License {
 		);
 
 		if ( $license_action == 'slm_activate' ) {
-			$api_params['license_key'] = $license_key;
-		}
 
-		update_option( $this->option_key, array( 'license_key' => $license_key ) );
+			// add license key to the api param
+			$api_params['license_key'] = $license_key;
+
+			// Settings license to the data
+			$this->data = array( 'license_key' => $license_key );
+		}
 
 		if ( $this->is_error( $api_response = $this->license_api_request( $api_params ) ) ) {
 			Client::print_notice( sprintf( '<p>%s</p>', $api_response['message'] ), 'error' );
@@ -335,7 +356,6 @@ class License {
 
 		return isset( $license_data[ $retrieve_data ] ) ? $license_data[ $retrieve_data ] : '';
 	}
-
 
 
 	/**
