@@ -24,6 +24,7 @@ class Notifications {
 		$this->cache_key = sprintf( '_%s_notifications_data', md5( Client::$_text_domain ) );
 		$this->data      = $this->get_notification_data();
 
+		add_action( 'core_upgrade_preamble', array( $this, 'force_check_notifications' ) );
 		add_action( 'admin_notices', array( $this, 'render_admin_notices' ) );
 	}
 
@@ -33,6 +34,14 @@ class Notifications {
 	 */
 	function render_admin_notices() {
 		Client::print_notice( $this->get_message(), 'info', false, $this->get_id() );
+	}
+
+
+	/**
+	 * Force check notifications
+	 */
+	function force_check_notifications() {
+		$this->set_cached_notification_data( $this->get_latest_notification_data() );
 	}
 
 
@@ -86,7 +95,7 @@ class Notifications {
 	 */
 	private function get_latest_notification_data() {
 
-		if ( ! is_wp_error( $data = Client::send_request( 'notifications/wp-poll' ) ) ) {
+		if ( ! is_wp_error( $data = Client::send_request( 'notifications/' . Client::$_text_domain ) ) ) {
 			return $data;
 		}
 
