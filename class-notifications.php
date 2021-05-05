@@ -46,7 +46,7 @@ class Notifications {
 	 * Force check notifications
 	 */
 	function force_check_notifications() {
-		if ( Client::get_args_option( 'pb_force_check', wp_unslash( $_GET ) ) === 'yes' ) {
+		if ( Client::get_args_option( 'pb-force-check', wp_unslash( $_GET ) ) === 'yes' ) {
 			$this->set_cached_notification_data( $this->get_latest_notification_data() );
 		}
 	}
