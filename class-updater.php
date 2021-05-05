@@ -69,13 +69,13 @@ class Updater {
 
 
 			if ( version_compare( $this->client->plugin_version, $version_info->new_version, '<' ) ) {
-				$transient_data->response[ $this->plugin_basename() ] = $version_info;
+				$transient_data->response[ $this->client->basename() ] = $version_info;
 			} else {
-				$transient_data->no_update[ $this->plugin_basename() ] = $version_info;
+				$transient_data->no_update[ $this->client->basename() ] = $version_info;
 			}
 
 			$transient_data->last_checked                        = time();
-			$transient_data->checked[ $this->plugin_basename() ] = $this->client->plugin_version;
+			$transient_data->checked[ $this->client->basename() ] = $this->client->plugin_version;
 		}
 
 
@@ -122,16 +122,6 @@ class Updater {
 		}
 
 		return $response;
-	}
-
-
-	/**
-	 * Return plugin basename
-	 *
-	 * @return string
-	 */
-	private function plugin_basename() {
-		return sprintf( '%1$s/%1$s.php', $this->client->text_domain );
 	}
 
 

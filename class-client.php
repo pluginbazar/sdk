@@ -57,7 +57,7 @@ class Client {
 	 *
 	 * @return \Pluginbazar\Updater
 	 */
-	public static function updater() {
+	public function updater() {
 		if ( ! class_exists( __NAMESPACE__ . '\Updater' ) ) {
 			require_once __DIR__ . '/class-updater.php';
 		}
@@ -75,7 +75,7 @@ class Client {
 	 *
 	 * @return \Pluginbazar\License
 	 */
-	public static function license() {
+	public function license() {
 		if ( ! class_exists( __NAMESPACE__ . '\License' ) ) {
 			require_once __DIR__ . '/class-license.php';
 		}
@@ -93,7 +93,7 @@ class Client {
 	 *
 	 * @return \Pluginbazar\Notifications
 	 */
-	public static function notifications() {
+	public function notifications() {
 
 		if ( ! class_exists( __NAMESPACE__ . '\Notifications' ) ) {
 			require_once __DIR__ . '/class-notifications.php';
@@ -140,14 +140,15 @@ class Client {
 	 * @param $plugin_reference
 	 * @param $plugin_version
 	 */
-	public static function init( $plugin_name, $text_domain, $plugin_reference, $plugin_version ) {
+	public function init( $plugin_name, $text_domain, $plugin_reference, $plugin_version ) {
 		// Initialize variables
-		self::$_instance->plugin_name      = $plugin_name;
-		self::$_instance->text_domain      = $text_domain;
-		self::$_instance->plugin_reference = $plugin_reference;
-		self::$_instance->plugin_version   = $plugin_version;
+		$this->plugin_name      = $plugin_name;
+		$this->text_domain      = $text_domain;
+		$this->plugin_reference = $plugin_reference;
+		$this->plugin_version   = $plugin_version;
 
-		self::notifications();
+		// Enable notifications
+		$this->notifications();
 	}
 
 
@@ -343,7 +344,7 @@ class Client {
 	 * @return string
 	 */
 	public function basename() {
-		return sprintf( '%s/%s.php', $this->text_domain );
+		return sprintf( '%1$s/%1$s.php', $this->text_domain );
 	}
 
 
