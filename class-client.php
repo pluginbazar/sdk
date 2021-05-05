@@ -15,10 +15,10 @@ namespace Pluginbazar;
  */
 class Client {
 
-	private static $_instance = null;
-
 	public static $_integration_server = 'https://c.pluginbazar.com';
 	public static $_notices_prefix = 'pb_notices_';
+
+	private $instance = null;
 
 	public $plugin_name = null;
 	public $text_domain = null;
@@ -63,7 +63,7 @@ class Client {
 		}
 
 		if ( ! self::$updater ) {
-			self::$updater = new Updater( self::$_instance );
+			self::$updater = new Updater( $this->instance );
 		}
 
 		return self::$updater;
@@ -81,7 +81,7 @@ class Client {
 		}
 
 		if ( ! self::$license ) {
-			self::$license = new License( self::$_instance );
+			self::$license = new License( $this->instance );
 		}
 
 		return self::$license;
@@ -100,7 +100,7 @@ class Client {
 		}
 
 		if ( ! self::$notifications ) {
-			self::$notifications = new Notifications( self::$_instance );
+			self::$notifications = new Notifications( $this->instance );
 		}
 
 		return self::$notifications;
@@ -351,11 +351,11 @@ class Client {
 	/**
 	 * @return Client
 	 */
-	public static function instance() {
-		if ( is_null( self::$_instance ) ) {
-			self::$_instance = new self();
+	public function instance() {
+		if ( is_null( $this->instance ) ) {
+			$this->instance = new self();
 		}
 
-		return self::$_instance;
+		return $this->instance;
 	}
 }
