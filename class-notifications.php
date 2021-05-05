@@ -29,7 +29,7 @@ class Notifications {
 		$this->cache_key = sprintf( '_%s_notifications_data', md5( $this->client->text_domain ) );
 		$this->data      = $this->get_notification_data();
 
-		add_action( 'core_upgrade_preamble', array( $this, 'force_check_notifications' ) );
+		add_action( 'init', array( $this, 'force_check_notifications' ) );
 		add_action( 'admin_notices', array( $this, 'render_admin_notices' ) );
 	}
 
@@ -46,7 +46,9 @@ class Notifications {
 	 * Force check notifications
 	 */
 	function force_check_notifications() {
-		$this->set_cached_notification_data( $this->get_latest_notification_data() );
+		if ( Client::get_args_option( 'pb_force_check', wp_unslash( $_GET ) ) === 'yes' ) {
+			$this->set_cached_notification_data( $this->get_latest_notification_data() );
+		}
 	}
 
 
@@ -115,7 +117,8 @@ class Notifications {
 	 */
 	private function set_cached_notification_data( $value ) {
 		if ( $value ) {
-			set_transient( $this->cache_key, $value, 8 * HOUR_IN_SECONDS );
+			// check notifications in every 3 days
+			set_transient( $this->cache_key, $value, 3 * 24 * HOUR_IN_SECONDS );
 		}
 	}
 
