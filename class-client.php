@@ -18,8 +18,6 @@ class Client {
 	public static $_integration_server = 'https://c.pluginbazar.com';
 	public static $_notices_prefix = 'pb_notices_';
 
-	private $instance = null;
-
 	public $plugin_name = null;
 	public $text_domain = null;
 	public $plugin_reference = null;
@@ -46,8 +44,23 @@ class Client {
 
 	/**
 	 * Client constructor.
+	 *
+	 * @param $plugin_name
+	 * @param $text_domain
+	 * @param $plugin_reference
+	 * @param $plugin_version
 	 */
-	function __construct() {
+	function __construct( $plugin_name, $text_domain, $plugin_reference, $plugin_version ) {
+
+		// Initialize variables
+		$this->plugin_name      = $plugin_name;
+		$this->text_domain      = $text_domain;
+		$this->plugin_reference = $plugin_reference;
+		$this->plugin_version   = $plugin_version;
+
+		// Enable notifications
+		$this->notifications();
+
 		add_action( 'admin_init', array( $this, 'manage_permanent_dismissible' ) );
 	}
 
@@ -63,7 +76,7 @@ class Client {
 		}
 
 		if ( ! self::$updater ) {
-			self::$updater = new Updater( $this->instance );
+			self::$updater = new Updater( $this );
 		}
 
 		return self::$updater;
@@ -81,7 +94,7 @@ class Client {
 		}
 
 		if ( ! self::$license ) {
-			self::$license = new License( $this->instance );
+			self::$license = new License( $this );
 		}
 
 		return self::$license;
@@ -100,7 +113,7 @@ class Client {
 		}
 
 		if ( ! self::$notifications ) {
-			self::$notifications = new Notifications( $this->instance );
+			self::$notifications = new Notifications( $this );
 		}
 
 		return self::$notifications;
@@ -129,26 +142,6 @@ class Client {
 			wp_safe_redirect( esc_url_raw( add_query_arg( $query_args, site_url( $redirect['path'] ) ) ) );
 			exit;
 		}
-	}
-
-
-	/**
-	 * Init client object
-	 *
-	 * @param $plugin_name
-	 * @param $text_domain
-	 * @param $plugin_reference
-	 * @param $plugin_version
-	 */
-	public function init( $plugin_name, $text_domain, $plugin_reference, $plugin_version ) {
-		// Initialize variables
-		$this->plugin_name      = $plugin_name;
-		$this->text_domain      = $text_domain;
-		$this->plugin_reference = $plugin_reference;
-		$this->plugin_version   = $plugin_version;
-
-		// Enable notifications
-		$this->notifications();
 	}
 
 
@@ -345,17 +338,5 @@ class Client {
 	 */
 	public function basename() {
 		return sprintf( '%1$s/%1$s.php', $this->text_domain );
-	}
-
-
-	/**
-	 * @return Client
-	 */
-	public function instance() {
-		if ( is_null( $this->instance ) ) {
-			$this->instance = new self();
-		}
-
-		return $this->instance;
 	}
 }
