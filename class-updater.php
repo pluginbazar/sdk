@@ -63,11 +63,6 @@ class Updater {
 				unset( $version_info->sections );
 			}
 
-			echo "<pre>";
-			print_r( $this->client->plugin_version );
-			echo "</pre>";
-
-
 			if ( version_compare( $this->client->plugin_version, $version_info->new_version, '<' ) ) {
 				$transient_data->response[ $this->client->basename() ] = $version_info;
 			} else {
