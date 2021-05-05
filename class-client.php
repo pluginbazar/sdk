@@ -2,7 +2,7 @@
 /**
  * Pluginbazar SDK Client
  *
- * @version 1.0.2
+ * @version 1.0.3
  * @author Pluginbazar
  */
 
@@ -19,10 +19,11 @@ class Client {
 
 	public static $_integration_server = 'https://c.pluginbazar.com';
 	public static $_notices_prefix = 'pb_notices_';
-	public static $_plugin_name = null;
-	public static $_text_domain = null;
-	public static $_plugin_reference = null;
-	public static $_plugin_version = null;
+
+	public $plugin_name = null;
+	public $text_domain = null;
+	public $plugin_reference = null;
+	public $plugin_version = null;
 
 
 	/**
@@ -48,8 +49,6 @@ class Client {
 	 */
 	function __construct() {
 		add_action( 'admin_init', array( $this, 'manage_permanent_dismissible' ) );
-
-		self::notifications();
 	}
 
 
@@ -64,7 +63,7 @@ class Client {
 		}
 
 		if ( ! self::$updater ) {
-			self::$updater = new Updater();
+			self::$updater = new Updater( self::$_instance );
 		}
 
 		return self::$updater;
@@ -82,7 +81,7 @@ class Client {
 		}
 
 		if ( ! self::$license ) {
-			self::$license = new License();
+			self::$license = new License( self::$_instance );
 		}
 
 		return self::$license;
@@ -101,7 +100,7 @@ class Client {
 		}
 
 		if ( ! self::$notifications ) {
-			self::$notifications = new Notifications();
+			self::$notifications = new Notifications( self::$_instance );
 		}
 
 		return self::$notifications;
@@ -143,10 +142,12 @@ class Client {
 	 */
 	public static function init( $plugin_name, $text_domain, $plugin_reference, $plugin_version ) {
 		// Initialize variables
-		self::$_plugin_name      = $plugin_name;
-		self::$_text_domain      = $text_domain;
-		self::$_plugin_reference = $plugin_reference;
-		self::$_plugin_version   = $plugin_version;
+		self::$_instance->plugin_name      = $plugin_name;
+		self::$_instance->text_domain      = $text_domain;
+		self::$_instance->plugin_reference = $plugin_reference;
+		self::$_instance->plugin_version   = $plugin_version;
+
+		self::notifications();
 	}
 
 
@@ -160,7 +161,7 @@ class Client {
 	 *
 	 * @return array|mixed|\WP_Error
 	 */
-	public static function send_request( $route, $params = array(), $is_post = false, $blocking = false ) {
+	public function send_request( $route, $params = array(), $is_post = false, $blocking = false ) {
 
 		$url = trailingslashit( self::$_integration_server ) . 'wp-json/data/' . $route;
 
@@ -174,7 +175,7 @@ class Client {
 					'user-agent' => 'Pluginbazar/' . md5( esc_url( site_url() ) ) . ';',
 					'Accept'     => 'application/json',
 				),
-				'body'        => array_merge( $params, array( 'version' => self::$_plugin_version ) ),
+				'body'        => array_merge( $params, array( 'version' => $this->plugin_version ) ),
 				'cookies'     => array(),
 				'sslverify'   => false,
 			) );
@@ -198,7 +199,7 @@ class Client {
 	 * @param bool $is_dismissible
 	 * @param bool $permanent_dismiss
 	 */
-	public static function print_notice( $message = '', $type = 'success', $is_dismissible = true, $permanent_dismiss = false ) {
+	public function print_notice( $message = '', $type = 'success', $is_dismissible = true, $permanent_dismiss = false ) {
 
 		if ( $permanent_dismiss && ! empty( get_option( self::get_notices_id( $permanent_dismiss ) ) ) ) {
 			return;
@@ -212,7 +213,7 @@ class Client {
 			$is_dismissible = 'pb-is-dismissible';
 			$pb_dismissible = sprintf( '<a href="%s" class="notice-dismiss"><span class="screen-reader-text">%s</span></a>',
 				esc_url_raw( add_query_arg( array( 'pb_action' => 'permanent_dismissible', 'id' => $permanent_dismiss ), site_url( $_SERVER['REQUEST_URI'] ) ) ),
-				esc_html__( 'Dismiss', Client::$_text_domain )
+				esc_html__( 'Dismiss', $this->text_domain )
 			);
 		}
 
@@ -323,16 +324,26 @@ class Client {
 	/**
 	 * Translate function _e()
 	 */
-	public static function _etrans( $text ) {
-		call_user_func( '_e', $text, self::$_text_domain );
+	public function _etrans( $text ) {
+		call_user_func( '_e', $text, $this->text_domain );
 	}
 
 
 	/**
 	 * Translate function __()
 	 */
-	public static function __trans( $text ) {
-		return call_user_func( '__', $text, self::$_text_domain );
+	public function __trans( $text ) {
+		return call_user_func( '__', $text, $this->text_domain );
+	}
+
+
+	/**
+	 * Return Plugin Basename
+	 *
+	 * @return string
+	 */
+	public function basename() {
+		return sprintf( '%s/%s.php', $this->text_domain );
 	}
 
 

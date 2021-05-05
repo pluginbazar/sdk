@@ -19,14 +19,20 @@ class License {
 	protected $license_server = 'https://pluginbazar.com';
 	protected $secret_key = '5beed4ad27fd52.16817105';
 
+	/**
+	 * @var Client null
+	 */
+	private $client = null;
 
 	/**
 	 * License constructor.
 	 */
-	function __construct() {
+	function __construct( Client $client ) {
 
-		$this->option_key = sprintf( 'pb_%s_license_data', md5( Client::$_text_domain ) );
-		$this->cache_key  = sprintf( 'pb_%s_version_info', md5( Client::$_text_domain ) );
+		$this->client = $client;
+
+		$this->option_key = sprintf( 'pb_%s_license_data', md5( $this->client->text_domain ) );
+		$this->cache_key  = sprintf( 'pb_%s_version_info', md5( $this->client->text_domain ) );
 		$this->data       = get_option( $this->option_key, array() );
 
 		add_action( 'admin_notices', array( $this, 'license_activation_notices' ) );
@@ -42,11 +48,11 @@ class License {
 			return;
 		}
 
-		$license_message = sprintf( Client::__trans( '<p>You must activate <strong>%s</strong> to unlock the premium features, enable single-click download, and etc. Dont have your key? <a href="%s" target="_blank">Your license keys</a></p><p><a class="button-primary" href="%s">Activate License</a></p>' ),
-			Client::$_plugin_name, sprintf( '%s/my-account/license-keys/', $this->license_server ), menu_page_url( $this->menu_args['menu_slug'], false )
+		$license_message = sprintf( $this->client->__trans( '<p>You must activate <strong>%s</strong> to unlock the premium features, enable single-click download, and etc. Dont have your key? <a href="%s" target="_blank">Your license keys</a></p><p><a class="button-primary" href="%s">Activate License</a></p>' ),
+			$this->client->plugin_name, sprintf( '%s/my-account/license-keys/', $this->license_server ), menu_page_url( $this->menu_args['menu_slug'], false )
 		);
 
-		Client::print_notice( $license_message, 'warning' );
+		$this->client->print_notice( $license_message, 'warning' );
 	}
 
 
@@ -59,10 +65,10 @@ class License {
 
 		$defaults = array(
 			'type'        => 'submenu', // Can be: menu, options, submenu
-			'page_title'  => sprintf( Client::__trans( 'Manage License - %s' ), Client::$_plugin_name ),
-			'menu_title'  => Client::__trans( 'Manage License' ),
+			'page_title'  => sprintf( $this->client->__trans( 'Manage License - %s' ), $this->client->plugin_name ),
+			'menu_title'  => $this->client->__trans( 'Manage License' ),
 			'capability'  => 'manage_options',
-			'menu_slug'   => Client::$_text_domain . '-manage-license',
+			'menu_slug'   => $this->client->text_domain . '-manage-license',
 			'icon_url'    => '',
 			'position'    => null,
 			'parent_slug' => '',
@@ -131,7 +137,7 @@ class License {
 		$license_action = isset( $_POST['license_action'] ) ? sanitize_text_field( $_POST['license_action'] ) : '';
 
 		if ( empty( $license_key ) || empty( $license_action ) ) {
-			Client::print_notice( sprintf( '<p>%s</p>', Client::__trans( 'Invalid license key' ) ), 'error' );
+			$this->client->print_notice( sprintf( '<p>%s</p>', $this->client->__trans( 'Invalid license key' ) ), 'error' );
 
 			return;
 		}
@@ -152,14 +158,14 @@ class License {
 		}
 
 		if ( $this->is_error( $api_response = $this->license_api_request( $api_params ) ) ) {
-			Client::print_notice( sprintf( '<p>%s</p>', $api_response['message'] ), 'error' );
+			$this->client->print_notice( sprintf( '<p>%s</p>', $api_response['message'] ), 'error' );
 
 			return;
 		}
 
 		if ( ! $this->is_error( $_api_response = $this->license_api_request() ) ) {
 
-			Client::print_notice( sprintf( '<p>%s</p>', $api_response['message'] ) );
+			$this->client->print_notice( sprintf( '<p>%s</p>', $api_response['message'] ) );
 
 			$this->data = $_api_response;
 			update_option( $this->option_key, $_api_response );
@@ -180,7 +186,7 @@ class License {
 			'slm_action'     => 'slm_check',
 			'secret_key'     => $this->secret_key,
 			'license_key'    => $this->get_license_data( 'license_key' ),
-			'item_reference' => Client::$_plugin_reference,
+			'item_reference' => $this->client->plugin_reference,
 		);
 
 		$api_params = wp_parse_args( $api_params, $defaults );
@@ -226,7 +232,7 @@ class License {
 
 		?>
         <div class="wrap pb-license-settings-wrapper">
-            <h1><?php printf( Client::__trans( 'License settings for <strong>%s</strong>' ), Client::$_plugin_name ); ?></h1>
+            <h1><?php printf( $this->client->__trans( 'License settings for <strong>%s</strong>' ), $this->client->plugin_name ); ?></h1>
 
             <div class="pb-license-settings pb-license-section action-<?php echo esc_attr( $license_action ); ?>">
 
@@ -234,7 +240,7 @@ class License {
 
                 <div class="pb-license-details">
                     <p>
-						<?php printf( Client::__trans( 'Activate or Deactivate <strong>%s</strong> by your license key to get support and automatic update from your WordPress dashboard.' ), Client::$_plugin_name ); ?>
+						<?php printf( $this->client->__trans( 'Activate or Deactivate <strong>%s</strong> by your license key to get support and automatic update from your WordPress dashboard.' ), $this->client->plugin_name ); ?>
                     </p>
                     <form method="post" action="<?php echo esc_url_raw( $this->form_url() ); ?>" novalidate="novalidate" spellcheck="false">
                         <input type="hidden" name="license_action" value="<?php echo esc_attr( $license_action ); ?>">
@@ -244,16 +250,16 @@ class License {
                                 <svg enable-background="new 0 0 512 512" version="1.1" viewBox="0 0 512 512" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
                                         <path d="m463.75 48.251c-64.336-64.336-169.01-64.335-233.35 1e-3 -43.945 43.945-59.209 108.71-40.181 167.46l-185.82 185.82c-2.813 2.813-4.395 6.621-4.395 10.606v84.858c0 8.291 6.709 15 15 15h84.858c3.984 0 7.793-1.582 10.605-4.395l21.211-21.226c3.237-3.237 4.819-7.778 4.292-12.334l-2.637-22.793 31.582-2.974c7.178-0.674 12.847-6.343 13.521-13.521l2.974-31.582 22.793 2.651c4.233 0.571 8.496-0.85 11.704-3.691 3.193-2.856 5.024-6.929 5.024-11.206v-27.929h27.422c3.984 0 7.793-1.582 10.605-4.395l38.467-37.958c58.74 19.043 122.38 4.929 166.33-39.046 64.336-64.335 64.336-169.01 0-233.35zm-42.435 106.07c-17.549 17.549-46.084 17.549-63.633 0s-17.549-46.084 0-63.633 46.084-17.549 63.633 0 17.548 46.084 0 63.633z"/>
                                     </svg>
-                                <input type="text" autocomplete="off" value="<?php echo esc_attr( $this->get_license_key_for_input_field( $license_action ) ); ?>" placeholder="<?php echo esc_attr( Client::__trans( 'Enter your license key to activate' ) ); ?>" name="license_key"<?php echo $this->is_valid() ? 'readonly="readonly"' : ''; ?>/>
+                                <input type="text" autocomplete="off" value="<?php echo esc_attr( $this->get_license_key_for_input_field( $license_action ) ); ?>" placeholder="<?php echo esc_attr( $this->client->__trans( 'Enter your license key to activate' ) ); ?>" name="license_key"<?php echo $this->is_valid() ? 'readonly="readonly"' : ''; ?>/>
                             </div>
-                            <button type="submit" name="submit"><?php echo $this->is_valid() ? Client::__trans( 'Deactivate License' ) : Client::__trans( 'Activate License' ); ?></button>
+                            <button type="submit" name="submit"><?php echo $this->is_valid() ? $this->client->__trans( 'Deactivate License' ) : $this->client->__trans( 'Activate License' ); ?></button>
                         </div>
                     </form>
                     <p>
-						<?php printf( Client::__trans( 'Find your license key from <a target="_blank" href="%s/my-account/license-keys/"><strong>Pluginbazar.com > My Account > License Keys</strong></a>' ), $this->license_server ); ?>
+						<?php printf( $this->client->__trans( 'Find your license key from <a target="_blank" href="%s/my-account/license-keys/"><strong>Pluginbazar.com > My Account > License Keys</strong></a>' ), $this->license_server ); ?>
                     </p>
                     <p>
-						<?php printf( Client::__trans( 'Download latest version manually from <a target="_blank" href="%s/my-account/downloads/"><strong>Pluginbazar.com > My Account > Downloads</strong></a>' ), $this->license_server ); ?>
+						<?php printf( $this->client->__trans( 'Download latest version manually from <a target="_blank" href="%s/my-account/downloads/"><strong>Pluginbazar.com > My Account > Downloads</strong></a>' ), $this->license_server ); ?>
                     </p>
                 </div>
             </div>
@@ -300,7 +306,7 @@ class License {
 	 * @return string
 	 */
 	private function nonce() {
-		return sprintf( 'pb_license_%s', str_replace( '-', '_', Client::$_text_domain ) );
+		return sprintf( 'pb_license_%s', str_replace( '-', '_', $this->client->text_domain ) );
 	}
 
 
@@ -520,7 +526,7 @@ class License {
                 <path d="m150 85.849c-13.111 0-23.775 10.665-23.775 23.775v25.319h47.548v-25.319c-1e-3 -13.108-10.665-23.775-23.773-23.775z"/>
                 <path d="m150 1e-3c-82.839 0-150 67.158-150 150 0 82.837 67.156 150 150 150s150-67.161 150-150c0-82.839-67.161-150-150-150zm46.09 227.12h-92.173c-9.734 0-17.626-7.892-17.626-17.629v-56.919c0-8.491 6.007-15.582 14.003-17.25v-25.697c0-27.409 22.3-49.711 49.711-49.711 27.409 0 49.709 22.3 49.709 49.711v25.697c7.993 1.673 14 8.759 14 17.25v56.919h2e-3c0 9.736-7.892 17.629-17.626 17.629z"/>
                 </svg>
-			<?php printf( '<span>%s</span>', Client::__trans( 'Manage License' ) ); ?>
+			<?php printf( '<span>%s</span>', $this->client->__trans( 'Manage License' ) ); ?>
         </div>
 		<?php
 	}

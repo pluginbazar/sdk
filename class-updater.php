@@ -16,9 +16,19 @@ class Updater {
 	protected $data;
 
 	/**
-	 * Updater constructor.
+	 * @var Client null
 	 */
-	function __construct() {
+	private $client = null;
+
+
+	/**
+	 * Updater constructor.
+	 *
+	 * @param Client $client
+	 */
+	function __construct( Client $client ) {
+
+		$this->client = $client;
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_plugin_update' ) );
 	}
 
@@ -41,7 +51,7 @@ class Updater {
 			return $transient_data;
 		}
 
-		if ( ! empty( $transient_data->response ) && ! empty( $transient_data->response[ $this->client->basename ] ) ) {
+		if ( ! empty( $transient_data->response ) && ! empty( $transient_data->response[ $this->client->basename() ] ) ) {
 			return $transient_data;
 		}
 
@@ -53,15 +63,21 @@ class Updater {
 				unset( $version_info->sections );
 			}
 
-			if ( version_compare( Client::$_plugin_version, $version_info->new_version, '<' ) ) {
+			echo "<pre>";
+			print_r( $this->client->plugin_version );
+			echo "</pre>";
+
+
+			if ( version_compare( $this->client->plugin_version, $version_info->new_version, '<' ) ) {
 				$transient_data->response[ $this->plugin_basename() ] = $version_info;
 			} else {
 				$transient_data->no_update[ $this->plugin_basename() ] = $version_info;
 			}
 
 			$transient_data->last_checked                        = time();
-			$transient_data->checked[ $this->plugin_basename() ] = Client::$_plugin_version;
+			$transient_data->checked[ $this->plugin_basename() ] = $this->client->plugin_version;
 		}
+
 
 		return $transient_data;
 	}
@@ -115,7 +131,7 @@ class Updater {
 	 * @return string
 	 */
 	private function plugin_basename() {
-		return sprintf( '%1$s/%1$s.php', Client::$_text_domain );
+		return sprintf( '%1$s/%1$s.php', $this->client->text_domain );
 	}
 
 

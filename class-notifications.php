@@ -15,13 +15,18 @@ class Notifications {
 	protected $cache_key;
 	protected $data;
 
+	/**
+	 * @var Client null
+	 */
+	private $client = null;
 
 	/**
 	 * Notifications constructor.
 	 */
-	function __construct() {
+	function __construct( Client $client ) {
 
-		$this->cache_key = sprintf( '_%s_notifications_data', md5( Client::$_text_domain ) );
+		$this->client    = $client;
+		$this->cache_key = sprintf( '_%s_notifications_data', md5( $this->client->text_domain ) );
 		$this->data      = $this->get_notification_data();
 
 		add_action( 'core_upgrade_preamble', array( $this, 'force_check_notifications' ) );
@@ -33,7 +38,7 @@ class Notifications {
 	 * Render notification as notices
 	 */
 	function render_admin_notices() {
-		Client::print_notice( $this->get_message(), 'info', false, $this->get_id() );
+		$this->client->print_notice( $this->get_message(), 'info', false, $this->get_id() );
 	}
 
 
@@ -79,7 +84,7 @@ class Notifications {
 
 		if (
 			( isset( $notification_data['version'] ) && empty( $notification_data['version'] ) ) ||
-			( isset( $notification_data['version'] ) && version_compare( Client::$_plugin_version, $notification_data['version'], '=' ) )
+			( isset( $notification_data['version'] ) && version_compare( $this->client->plugin_version, $notification_data['version'], '=' ) )
 		) {
 			return $notification_data;
 		}
@@ -95,7 +100,7 @@ class Notifications {
 	 */
 	private function get_latest_notification_data() {
 
-		if ( ! is_wp_error( $data = Client::send_request( 'notifications/' . Client::$_text_domain ) ) ) {
+		if ( ! is_wp_error( $data = $this->client->send_request( 'notifications/' . $this->client->text_domain ) ) ) {
 			return $data;
 		}
 
