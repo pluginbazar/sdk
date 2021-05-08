@@ -2,7 +2,7 @@
 /**
  * Pluginbazar SDK Client
  *
- * @version 1.0.5
+ * @version 1.0.6
  * @author Pluginbazar
  */
 
@@ -57,6 +57,9 @@ class Client {
 		$this->text_domain      = $text_domain;
 		$this->plugin_reference = $plugin_reference;
 		$this->plugin_version   = $plugin_version;
+
+		// Loading notifications
+		$this->notifications();
 
 		add_action( 'admin_init', array( $this, 'manage_permanent_dismissible' ) );
 	}

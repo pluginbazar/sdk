@@ -117,8 +117,8 @@ class Notifications {
 	 */
 	private function set_cached_notification_data( $value ) {
 		if ( $value ) {
-			// check notifications in every 3 days
-			set_transient( $this->cache_key, $value, 3 * 24 * HOUR_IN_SECONDS );
+			// check notifications in every 5 days
+			set_transient( $this->cache_key, $value, 5 * 24 * HOUR_IN_SECONDS );
 		}
 	}
 
