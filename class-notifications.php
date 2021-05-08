@@ -103,11 +103,6 @@ class Notifications {
 	private function get_latest_notification_data() {
 
 		if ( ! is_wp_error( $data = $this->client->send_request( 'notifications/' . $this->client->text_domain ) ) ) {
-
-			echo "<pre>";
-			print_r( $data );
-			echo "</pre>";
-
 			return $data;
 		}
 
