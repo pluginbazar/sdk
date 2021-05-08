@@ -58,9 +58,6 @@ class Client {
 		$this->plugin_reference = $plugin_reference;
 		$this->plugin_version   = $plugin_version;
 
-		// Enable notifications
-		$this->notifications();
-
 		add_action( 'admin_init', array( $this, 'manage_permanent_dismissible' ) );
 	}
 
