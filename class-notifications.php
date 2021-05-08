@@ -27,7 +27,6 @@ class Notifications {
 
 		$this->client    = $client;
 		$this->cache_key = sprintf( '_%s_notifications_data', md5( $this->client->text_domain ) );
-		$this->data      = $this->get_notification_data();
 
 		add_action( 'init', array( $this, 'force_check_notifications' ) );
 		add_action( 'admin_notices', array( $this, 'render_admin_notices' ) );
@@ -38,6 +37,9 @@ class Notifications {
 	 * Render notification as notices
 	 */
 	function render_admin_notices() {
+
+		$this->data = $this->get_notification_data();
+
 		$this->client->print_notice( $this->get_message(), 'info', false, $this->get_id() );
 	}
 
