@@ -22,7 +22,7 @@ class License {
 	/**
 	 * @var Client null
 	 */
-	private $client = null;
+	protected $client = null;
 
 	/**
 	 * License constructor.

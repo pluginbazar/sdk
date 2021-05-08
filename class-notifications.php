@@ -18,7 +18,7 @@ class Notifications {
 	/**
 	 * @var Client null
 	 */
-	private $client = null;
+	protected $client = null;
 
 	/**
 	 * Notifications constructor.
