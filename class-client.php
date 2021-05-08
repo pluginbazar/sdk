@@ -27,19 +27,19 @@ class Client {
 	/**
 	 * @var \Pluginbazar\Notifications
 	 */
-	private $license;
+	protected $license;
 
 
 	/**
 	 * @var \Pluginbazar\Notifications
 	 */
-	private $notifications;
+	protected $notifications;
 
 
 	/**
 	 * @var \Pluginbazar\Updater
 	 */
-	private $updater;
+	protected $updater;
 
 
 	/**
