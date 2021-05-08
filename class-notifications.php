@@ -13,7 +13,6 @@ namespace Pluginbazar;
 class Notifications {
 
 	protected $cache_key;
-	protected $data;
 
 	/**
 	 * @var Client null
@@ -38,9 +37,8 @@ class Notifications {
 	 */
 	function render_admin_notices() {
 
-		$this->data = $this->get_notification_data();
-
-		$this->client->print_notice( $this->get_message(), 'info', false, $this->get_id() );
+		$data = $this->get_notification_data();
+		$this->client->print_notice( $this->get_message( $data ), 'info', false, $this->get_id( $data ) );
 	}
 
 
@@ -59,8 +57,8 @@ class Notifications {
 	 *
 	 * @return mixed|string
 	 */
-	private function get_message() {
-		return Client::get_parsed_string( Client::get_args_option( 'message', $this->data ) );
+	private function get_message( $data ) {
+		return Client::get_parsed_string( Client::get_args_option( 'message', $data ) );
 	}
 
 
@@ -69,8 +67,8 @@ class Notifications {
 	 *
 	 * @return array|mixed|string
 	 */
-	private function get_id() {
-		return Client::get_args_option( 'id', $this->data );
+	private function get_id( $data ) {
+		return Client::get_args_option( 'id', $data );
 	}
 
 
