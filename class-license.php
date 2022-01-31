@@ -22,7 +22,7 @@ class License {
 	/**
 	 * @var Client null
 	 */
-	protected $client = null;
+	private $client = null;
 
 	/**
 	 * License constructor.
@@ -84,7 +84,7 @@ class License {
 	 * Add admin Menu
 	 */
 	public function admin_menu() {
-		switch ( $type = Client::get_args_option( 'type', $this->menu_args ) ) {
+		switch ( $type = $this->client->get_args_option( 'type', $this->menu_args ) ) {
 			case 'menu':
 				call_user_func( 'add_' . $type . '_page',
 					$this->menu_args['page_title'],
@@ -145,7 +145,7 @@ class License {
 		// Sending request to server
 		$api_params = array(
 			'slm_action'        => $license_action,
-			'registered_domain' => Client::get_website_url(),
+			'registered_domain' => $this->client->get_website_url(),
 		);
 
 		if ( $license_action == 'slm_activate' ) {
@@ -157,19 +157,24 @@ class License {
 			$this->data = array( 'license_key' => $license_key );
 		}
 
-		if ( $this->is_error( $api_response = $this->license_api_request( $api_params ) ) ) {
-			$this->client->print_notice( sprintf( '<p>%s</p>', $api_response['message'] ), 'error' );
+		$api_response = $this->license_api_request( $api_params );
+		$message      = $this->client->get_args_option( 'message', $api_response );
+
+		if ( $this->is_error( $api_response ) ) {
+
+			$this->client->print_notice( sprintf( '<p>%s</p>', $message ), 'error' );
+
+			if ( $this->client->get_args_option( 'error_code', $api_response ) == 80 ) {
+				$this->flush_license_data();
+			}
 
 			return;
 		}
 
-		if ( ! $this->is_error( $_api_response = $this->license_api_request() ) ) {
+		$this->client->print_notice( sprintf( '<p>%s</p>', $api_response['message'] ) );
 
-			$this->client->print_notice( sprintf( '<p>%s</p>', $api_response['message'] ) );
-
-			$this->data = $_api_response;
-			update_option( $this->option_key, $_api_response );
-		}
+		$this->data = $api_response;
+		update_option( $this->option_key, $api_response );
 	}
 
 
@@ -191,7 +196,7 @@ class License {
 
 		$api_params = wp_parse_args( $api_params, $defaults );
 		$api_query  = esc_url_raw( add_query_arg( $api_params, $this->license_server ) );
-		$response   = wp_remote_get( $api_query, array( 'timeout' => 20, 'sslverify' => false ) );
+		$response   = wp_remote_post( $api_query, array( 'timeout' => 20, 'sslverify' => false ) );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -316,7 +321,15 @@ class License {
 	 * @return bool
 	 */
 	public function is_valid() {
-		return is_array( $registered_domains = $this->get_registered_domains() ) && in_array( Client::get_website_url(), $registered_domains );
+		return is_array( $registered_domains = $this->get_registered_domains() ) && in_array( $this->client->get_website_url(), $registered_domains );
+	}
+
+
+	/**
+	 * Flush license data
+	 */
+	private function flush_license_data() {
+		delete_option( $this->option_key );
 	}
 
 

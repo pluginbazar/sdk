@@ -13,11 +13,12 @@ namespace Pluginbazar;
 class Notifications {
 
 	protected $cache_key;
+	protected $data;
 
 	/**
 	 * @var Client null
 	 */
-	protected $client = null;
+	private $client = null;
 
 	/**
 	 * Notifications constructor.
@@ -36,9 +37,7 @@ class Notifications {
 	 * Render notification as notices
 	 */
 	function render_admin_notices() {
-
-		$data = $this->get_notification_data();
-		$this->client->print_notice( $this->get_message( $data ), 'info', false, $this->get_id( $data ) );
+		$this->client->print_notice( $this->get_message(), 'info', false, $this->get_id() );
 	}
 
 
@@ -46,7 +45,7 @@ class Notifications {
 	 * Force check notifications
 	 */
 	function force_check_notifications() {
-		if ( Client::get_args_option( 'pb-force-check', wp_unslash( $_GET ) ) === 'yes' ) {
+		if ( $this->client->get_args_option( 'force-check', wp_unslash( $_GET ) ) === 'yes' ) {
 			$this->set_cached_notification_data( $this->get_latest_notification_data() );
 		}
 	}
@@ -57,8 +56,8 @@ class Notifications {
 	 *
 	 * @return mixed|string
 	 */
-	private function get_message( $data ) {
-		return Client::get_parsed_string( Client::get_args_option( 'message', $data ) );
+	private function get_message() {
+		return $this->client->get_parsed_string( $this->client->get_args_option( 'message', $this->get_notification_data() ) );
 	}
 
 
@@ -67,8 +66,8 @@ class Notifications {
 	 *
 	 * @return array|mixed|string
 	 */
-	private function get_id( $data ) {
-		return Client::get_args_option( 'id', $data );
+	private function get_id() {
+		return $this->client->get_args_option( 'id', $this->get_notification_data() );
 	}
 
 
@@ -79,19 +78,12 @@ class Notifications {
 
 		$notification_data = $this->get_cached_notification_data();
 
-		if ( false === $notification_data ) {
+		if ( ! $notification_data ) {
 			$notification_data = $this->get_latest_notification_data();
 			$this->set_cached_notification_data( $notification_data );
 		}
 
-		if (
-			( isset( $notification_data['version'] ) && empty( $notification_data['version'] ) ) ||
-			( isset( $notification_data['version'] ) && version_compare( $this->client->plugin_version, $notification_data['version'], '=' ) )
-		) {
-			return $notification_data;
-		}
-
-		return array();
+		return $notification_data;
 	}
 
 
@@ -102,7 +94,7 @@ class Notifications {
 	 */
 	private function get_latest_notification_data() {
 
-		if ( ! is_wp_error( $data = $this->client->send_request( 'notifications/' . $this->client->text_domain ) ) ) {
+		if ( ! is_wp_error( $data = $this->client->send_request( 'notifications/' . $this->client->plugin_reference ) ) ) {
 			return $data;
 		}
 
@@ -117,8 +109,8 @@ class Notifications {
 	 */
 	private function set_cached_notification_data( $value ) {
 		if ( $value ) {
-			// check notifications in every 5 days
-			set_transient( $this->cache_key, $value, 5 * 24 * HOUR_IN_SECONDS );
+			// check notifications in every 2 days
+			set_transient( $this->cache_key, $value, 2 * 24 * HOUR_IN_SECONDS );
 		}
 	}
 

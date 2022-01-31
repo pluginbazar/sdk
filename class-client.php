@@ -2,7 +2,7 @@
 /**
  * Pluginbazar SDK Client
  *
- * @version 1.0.6
+ * @version 1.0.4
  * @author Pluginbazar
  */
 
@@ -15,9 +15,8 @@ namespace Pluginbazar;
  */
 class Client {
 
-	public static $_integration_server = 'https://c.pluginbazar.com';
-	public static $_notices_prefix = 'pb_notices_';
-
+	public $integration_server = 'https://pluginbazar.com';
+	public $notices_prefix = 'pb_notices_';
 	public $plugin_name = null;
 	public $text_domain = null;
 	public $plugin_reference = null;
@@ -25,21 +24,21 @@ class Client {
 
 
 	/**
-	 * @var \Pluginbazar\Notifications
+	 * @var \Pluginbazar\License
 	 */
-	protected $license;
+	private static $license;
 
 
 	/**
 	 * @var \Pluginbazar\Notifications
 	 */
-	protected $notifications;
+	private static $notifications;
 
 
 	/**
 	 * @var \Pluginbazar\Updater
 	 */
-	protected $updater;
+	private static $updater;
 
 
 	/**
@@ -58,9 +57,6 @@ class Client {
 		$this->plugin_reference = $plugin_reference;
 		$this->plugin_version   = $plugin_version;
 
-		// Loading notifications
-		$this->notifications();
-
 		add_action( 'admin_init', array( $this, 'manage_permanent_dismissible' ) );
 	}
 
@@ -75,11 +71,11 @@ class Client {
 			require_once __DIR__ . '/class-updater.php';
 		}
 
-		if ( ! $this->updater ) {
-			$this->updater = new Updater( $this );
+		if ( ! self::$updater ) {
+			self::$updater = new Updater( $this );
 		}
 
-		return $this->updater;
+		return self::$updater;
 	}
 
 
@@ -93,11 +89,11 @@ class Client {
 			require_once __DIR__ . '/class-license.php';
 		}
 
-		if ( ! $this->license ) {
-			$this->license = new License( $this );
+		if ( ! self::$license ) {
+			self::$license = new License( $this );
 		}
 
-		return $this->license;
+		return self::$license;
 	}
 
 
@@ -112,11 +108,11 @@ class Client {
 			require_once __DIR__ . '/class-notifications.php';
 		}
 
-		if ( ! $this->notifications ) {
-			$this->notifications = new Notifications( $this );
+		if ( ! self::$notifications ) {
+			self::$notifications = new Notifications( $this );
 		}
 
-		return $this->notifications;
+		return self::$notifications;
 	}
 
 
@@ -127,10 +123,10 @@ class Client {
 
 		$query_args = wp_unslash( $_GET );
 
-		if ( self::get_args_option( 'pb_action', $query_args ) == 'permanent_dismissible' && ! empty( $id = self::get_args_option( 'id', $query_args ) ) ) {
+		if ( $this->get_args_option( 'pb_action', $query_args ) == 'permanent_dismissible' && ! empty( $id = $this->get_args_option( 'id', $query_args ) ) ) {
 
 			// update value
-			update_option( self::get_notices_id( $id ), time() );
+			update_option( $this->get_notices_id( $id ), time() );
 
 			// Removing query args
 			unset( $query_args['pb_action'] );
@@ -152,12 +148,13 @@ class Client {
 	 * @param array $params
 	 * @param false $is_post
 	 * @param false $blocking
+	 * @param false $return_associative
 	 *
 	 * @return array|mixed|\WP_Error
 	 */
-	public function send_request( $route, $params = array(), $is_post = false, $blocking = false ) {
+	public function send_request( $route, $params = array(), $is_post = false, $blocking = false, $return_associative = true ) {
 
-		$url = trailingslashit( self::$_integration_server ) . 'wp-json/data/' . $route;
+		$url = trailingslashit( $this->integration_server ) . 'wp-json/data/' . $route;
 
 		if ( $is_post ) {
 			$response = wp_remote_post( $url, array(
@@ -181,7 +178,7 @@ class Client {
 			return $response;
 		}
 
-		return json_decode( wp_remote_retrieve_body( $response ), true );
+		return json_decode( wp_remote_retrieve_body( $response ), $return_associative );
 	}
 
 
@@ -195,7 +192,7 @@ class Client {
 	 */
 	public function print_notice( $message = '', $type = 'success', $is_dismissible = true, $permanent_dismiss = false ) {
 
-		if ( $permanent_dismiss && ! empty( get_option( self::get_notices_id( $permanent_dismiss ) ) ) ) {
+		if ( $permanent_dismiss && ! empty( get_option( $this->get_notices_id( $permanent_dismiss ) ) ) ) {
 			return;
 		}
 
@@ -241,7 +238,7 @@ class Client {
 	 *
 	 * @return mixed|string
 	 */
-	public static function get_args_option( $key = '', $args = array(), $default = '' ) {
+	public function get_args_option( $key = '', $args = array(), $default = '' ) {
 
 		$default = is_array( $default ) && empty( $default ) ? array() : $default;
 		$default = ! is_array( $default ) && empty( $default ) ? '' : $default;
@@ -262,8 +259,8 @@ class Client {
 	 *
 	 * @return string
 	 */
-	public static function get_notices_id( $id ) {
-		return self::$_notices_prefix . $id;
+	public function get_notices_id( $id ) {
+		return $this->integration_server . $id;
 	}
 
 
@@ -274,7 +271,7 @@ class Client {
 	 *
 	 * @return mixed|string
 	 */
-	public static function get_parsed_string( $string ) {
+	public function get_parsed_string( $string ) {
 
 		preg_match_all( '#\{(.*?)\}#', $string, $matches, PREG_SET_ORDER, 0 );
 
@@ -301,7 +298,7 @@ class Client {
 	 *
 	 * @return mixed|string
 	 */
-	public static function get_website_url() {
+	public function get_website_url() {
 
 //			if ( is_multisite() ) {
 //				return site_url();
