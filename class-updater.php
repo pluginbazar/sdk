@@ -18,7 +18,7 @@ class Updater {
 	/**
 	 * @var Client null
 	 */
-	protected $client = null;
+	private $client = null;
 
 
 	/**
@@ -69,7 +69,7 @@ class Updater {
 				$transient_data->no_update[ $this->client->basename() ] = $version_info;
 			}
 
-			$transient_data->last_checked                        = time();
+			$transient_data->last_checked                         = time();
 			$transient_data->checked[ $this->client->basename() ] = $this->client->plugin_version;
 		}
 
@@ -100,9 +100,7 @@ class Updater {
 	 */
 	function get_project_latest_version() {
 
-		$query_url = sprintf( '%s/wp-json/data/plugin/%s', esc_url( Client::$_integration_server ), $this->client->license()->get_license_data( 'license_key' ) );
-		$response  = wp_remote_get( $query_url, array( 'timeout' => 20, 'sslverify' => false ) );
-		$response  = json_decode( wp_remote_retrieve_body( $response ) );
+		$response = $this->client->send_request( 'plugin/' . $this->client->license()->get_license_data( 'license_key' ), array(), false, false, false );
 
 		if ( isset( $response->icons ) ) {
 			$response->icons = (array) $response->icons;
