@@ -2,7 +2,7 @@
 /**
  * Pluginbazar SDK Client
  *
- * @version 1.0.6
+ * @version 1.0.7
  * @author Pluginbazar
  */
 
@@ -338,7 +338,7 @@ class Client {
 	 *
 	 * @return string
 	 */
-	public function basename() {
-		return sprintf( '%1$s/%1$s.php', $this->text_domain );
+	public function basename( $for_pro = true ) {
+		return sprintf( '%1$s%2$s/%1$s%2$s.php', $this->text_domain, $for_pro ? '-pro' : '' );
 	}
 }

@@ -70,16 +70,4 @@ if ( $wppoll_sdk->license()->is_valid() ) {
 
 For any issues please create an support issue here https://pluginbazar.com/forum/sdk/
 
-
-## CHANGELOG
-
-	1.0.0
-    05/06/2021 | RELEASE | Initial release.
-
-    1.0.5
-    01/02/2022 | FIX | Bug fix with license server
-
-    1.0.6
-    03/02/2022 | FIX | Bug fix with license class
-
     
