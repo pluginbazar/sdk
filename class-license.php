@@ -44,7 +44,7 @@ class License {
 	 */
 	function license_activation_notices() {
 
-		if ( $this->is_valid() || ( isset( $_GET['page'] ) && sanitize_text_field( $_GET['page'] == $this->menu_args['menu_slug'] ) ) ) {
+		if ( ! $this->is_activate_pro() || $this->is_valid() || ( isset( $_GET['page'] ) && sanitize_text_field( $_GET['page'] == $this->menu_args['menu_slug'] ) ) ) {
 			return;
 		}
 
@@ -77,9 +77,24 @@ class License {
 		$this->menu_args = wp_parse_args( $args, $defaults );
 
 		// if pro version activated then add the license page menu
-		if ( is_plugin_active( sprintf( '%1$s-pro/%1$s-pro.php', $this->client->text_domain ) ) ) {
+		if ( $this->is_activate_pro() ) {
 			add_action( 'admin_menu', array( $this, 'admin_menu' ), 999 );
 		}
+	}
+
+
+	/**
+	 * Return is pro version activated
+	 *
+	 * @return bool
+	 */
+	public function is_activate_pro() {
+
+		if ( ! function_exists( 'get_plugins' ) ) {
+			include_once ABSPATH . '/wp-admin/includes/plugin.php';
+		}
+
+		return is_plugin_active( sprintf( '%1$s-pro/%1$s-pro.php', $this->client->text_domain ) );
 	}
 
 

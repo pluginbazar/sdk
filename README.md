@@ -79,4 +79,7 @@ For any issues please create an support issue here https://pluginbazar.com/forum
     1.0.5
     01/02/2022 | FIX | Bug fix with license server
 
+    1.0.6
+    03/02/2022 | FIX | Bug fix with license class
+
     
