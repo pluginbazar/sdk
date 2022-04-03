@@ -338,7 +338,7 @@ class Client {
 	 *
 	 * @return string
 	 */
-	public function basename( $for_pro = true ) {
-		return sprintf( '%1$s%2$s/%1$s%2$s.php', $this->text_domain, $for_pro ? '-pro' : '' );
+	public function basename() {
+		return sprintf( '%1$s/%1$s.php', $this->text_domain );
 	}
 }
