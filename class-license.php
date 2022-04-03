@@ -158,7 +158,16 @@ class License {
 		}
 
 		$api_response = $this->license_api_request( $api_params );
-		$message      = $this->client->get_args_option( 'message', $api_response );
+
+        if ( $api_response instanceof \WP_Error ) {
+
+	        $this->client->print_notice( sprintf( '<p>%s</p>', $api_response->get_error_message() ), 'error' );
+            $this->flush_license_data();
+
+	        return;
+		}
+
+		$message = $this->client->get_args_option( 'message', $api_response );
 
 		if ( $this->is_error( $api_response ) ) {
 
