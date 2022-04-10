@@ -2,7 +2,7 @@
 /**
  * Pluginbazar SDK Client
  *
- * @version 1.0.3
+ * @version 1.0.7
  * @author Pluginbazar
  */
 
@@ -20,6 +20,7 @@ class Client {
 	public $text_domain = null;
 	public $plugin_reference = null;
 	public $plugin_version = null;
+	public $plugin_file = null;
 
 	/**
 	 * @var \Pluginbazar\Settings
@@ -39,15 +40,16 @@ class Client {
 	 * @param $plugin_name
 	 * @param $text_domain
 	 * @param $plugin_reference
-	 * @param $plugin_file
+	 * @param $file
 	 */
-	function __construct( $plugin_name, $text_domain, $plugin_reference, $plugin_file ) {
+	function __construct( $plugin_name, $text_domain, $plugin_reference, $file ) {
 
 		// Initialize variables
 		$this->plugin_name      = $plugin_name;
 		$this->text_domain      = $text_domain;
 		$this->plugin_reference = $plugin_reference;
-		$plugin_data            = get_plugin_data( $plugin_file );
+		$this->plugin_file      = $file;
+		$plugin_data            = get_plugin_data( $this->plugin_file );
 		$this->plugin_version   = isset( $plugin_data['Version'] ) ? $plugin_data['Version'] : '';
 
 		add_action( 'admin_init', array( $this, 'manage_permanent_dismissible' ) );
@@ -207,136 +209,6 @@ class Client {
             </style>
 			<?php
 		}
-	}
-
-	/**
-	 * Register Shortcode
-	 *
-	 * @param string $shortcode
-	 * @param string $callable_func
-	 */
-	function register_shortcode( $shortcode = '', $callable_func = '' ) {
-
-		if ( empty( $shortcode ) || empty( $callable_func ) ) {
-			return;
-		}
-
-		add_shortcode( $shortcode, $callable_func );
-	}
-
-	/**
-	 * Register Taxonomy
-	 *
-	 * @param $tax_name
-	 * @param $obj_type
-	 * @param array $args
-	 */
-	function register_taxonomy( $tax_name, $obj_type, $args = array() ) {
-
-		if ( taxonomy_exists( $tax_name ) ) {
-			return;
-		}
-
-		$singular = $this->get_args_option( 'singular', $args, '' );
-		$plural   = $this->get_args_option( 'plural', $args, '' );
-		$labels   = $this->get_args_option( 'labels', $args, array() );
-
-		$args = wp_parse_args( $args,
-			array(
-				'description'         => sprintf( $this->__trans( 'This is where you can create and manage %s.' ), $plural ),
-				'public'              => true,
-				'show_ui'             => true,
-				'capability_type'     => 'post',
-				'map_meta_cap'        => true,
-				'publicly_queryable'  => true,
-				'exclude_from_search' => false,
-				'hierarchical'        => false,
-				'rewrite'             => true,
-				'query_var'           => true,
-				'show_in_nav_menus'   => true,
-				'show_in_menu'        => true,
-			)
-		);
-
-		$args['labels'] = wp_parse_args( $labels,
-			array(
-				'name'               => sprintf( $this->__trans( '%s' ), $plural ),
-				'singular_name'      => $singular,
-				'menu_name'          => $this->__trans( $singular ),
-				'all_items'          => sprintf( $this->__trans( '%s' ), $plural ),
-				'add_new'            => sprintf( $this->__trans( 'Add %s' ), $singular ),
-				'add_new_item'       => sprintf( $this->__trans( 'Add %s' ), $singular ),
-				'edit'               => $this->__trans( 'Edit' ),
-				'edit_item'          => sprintf( $this->__trans( '%s Details' ), $singular ),
-				'new_item'           => sprintf( $this->__trans( 'New %s' ), $singular ),
-				'view'               => sprintf( $this->__trans( 'View %s' ), $singular ),
-				'view_item'          => sprintf( $this->__trans( 'View %s' ), $singular ),
-				'search_items'       => sprintf( $this->__trans( 'Search %s' ), $plural ),
-				'not_found'          => sprintf( $this->__trans( 'No %s found' ), $plural ),
-				'not_found_in_trash' => sprintf( $this->__trans( 'No %s found in trash' ), $plural ),
-				'parent'             => sprintf( $this->__trans( 'Parent %s' ), $singular ),
-			)
-		);
-
-		register_taxonomy( $tax_name, $obj_type, apply_filters( "pb_register_taxonomy_$tax_name", $args, $obj_type ) );
-	}
-
-	/**
-	 * Register Post Type
-	 *
-	 * @param $post_type
-	 * @param array $args
-	 */
-	function register_post_type( $post_type, $args = array() ) {
-
-		if ( post_type_exists( $post_type ) ) {
-			return;
-		}
-
-		$singular = $this->get_args_option( 'singular', $args, '' );
-		$plural   = $this->get_args_option( 'plural', $args, '' );
-		$labels   = $this->get_args_option( 'labels', $args, array() );
-
-		$args = wp_parse_args( $args,
-			array(
-				'description'         => sprintf( $this->__trans( 'This is where you can create and manage %s.' ), $plural ),
-				'public'              => true,
-				'show_ui'             => true,
-				'capability_type'     => 'post',
-				'map_meta_cap'        => true,
-				'publicly_queryable'  => true,
-				'exclude_from_search' => false,
-				'hierarchical'        => false,
-				'rewrite'             => true,
-				'query_var'           => true,
-				'supports'            => array( 'title', 'thumbnail', 'editor', 'author' ),
-				'show_in_nav_menus'   => true,
-				'show_in_menu'        => true,
-				'menu_icon'           => '',
-			)
-		);
-
-		$args['labels'] = wp_parse_args( $labels,
-			array(
-				'name'               => sprintf( $this->__trans( '%s' ), $plural ),
-				'singular_name'      => $singular,
-				'menu_name'          => $this->__trans( $singular ),
-				'all_items'          => sprintf( $this->__trans( '%s' ), $plural ),
-				'add_new'            => sprintf( $this->__trans( 'Add %s' ), $singular ),
-				'add_new_item'       => sprintf( $this->__trans( 'Add %s' ), $singular ),
-				'edit'               => $this->__trans( 'Edit' ),
-				'edit_item'          => sprintf( $this->__trans( 'Edit %s' ), $singular ),
-				'new_item'           => sprintf( $this->__trans( 'New %s' ), $singular ),
-				'view'               => sprintf( $this->__trans( 'View %s' ), $singular ),
-				'view_item'          => sprintf( $this->__trans( 'View %s' ), $singular ),
-				'search_items'       => sprintf( $this->__trans( 'Search %s' ), $plural ),
-				'not_found'          => sprintf( $this->__trans( 'No %s found' ), $plural ),
-				'not_found_in_trash' => sprintf( $this->__trans( 'No %s found in trash' ), $plural ),
-				'parent'             => sprintf( $this->__trans( 'Parent %s' ), $singular ),
-			)
-		);
-
-		register_post_type( $post_type, apply_filters( "pb_register_post_type_$post_type", $args ) );
 	}
 
 

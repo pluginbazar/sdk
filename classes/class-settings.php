@@ -722,15 +722,25 @@ class Settings {
 	/**
 	 * Return Current Page
 	 *
+	 * @param $ret
+	 * @param $default
+	 *
 	 * @return false|int|string
 	 */
-	function get_current_page() {
+	function get_current_page( $ret = '', $default = '' ) {
 
-		$all_pages   = $this->get_pages();
-		$page_keys   = array_keys( $all_pages );
-		$default_tab = ! empty( $all_pages ) ? reset( $page_keys ) : "";
+		$all_pages         = $this->get_pages();
+		$page_keys         = array_keys( $all_pages );
+		$default_tab       = ! empty( $all_pages ) ? reset( $page_keys ) : "";
+		$current_page_name = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : $default_tab;
 
-		return isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : $default_tab;
+		if ( ! empty( $ret ) ) {
+			$current_page = $this->client->get_args_option( $current_page_name, $all_pages );
+
+			return isset( $current_page[ $ret ] ) ? $current_page[ $ret ] : $default;
+		}
+
+		return $current_page_name;
 	}
 
 
@@ -811,7 +821,7 @@ class Settings {
 
 		ob_start();
 
-		printf( '<h2>%s</h2><br>', $this->get( 'menu_title' ) );
+		printf( '<h2>%s - %s</h2><br>', $this->get( 'page_title', $this->get( 'menu_title' ) ), $this->get_current_page( 'page_nav' ) );
 
 		settings_errors();
 
@@ -819,7 +829,7 @@ class Settings {
 
 		$this->get_settings_nav_tabs();
 
-		if ( ! isset( $this->get_pages()[ $this->get_current_page() ]['show_submit'] ) || $this->get_pages()[ $this->get_current_page() ]['show_submit'] ) {
+		if ( $this->get_current_page( 'show_submit', true ) ) {
 			printf( '<form class="pb-settings-form" action="options.php" method="post">%s%s</form>', $this->get_setting_fields_html(), get_submit_button() );
 		} else {
 			print( $this->get_setting_fields_html() );
@@ -1064,31 +1074,31 @@ class Settings {
 	 */
 	static function generate_args_from_string( $string, $option ) {
 
-		if ( strpos( $string, 'pages' ) !== false ) {
+		if ( strpos( $string, 'PAGES' ) !== false ) {
 			return self::get_pages_array();
 		}
 
-		if ( strpos( $string, 'users' ) !== false ) {
+		if ( strpos( $string, 'USERS' ) !== false ) {
 			return self::get_users_array();
 		}
 
-		if ( strpos( $string, 'tax_' ) !== false ) {
+		if ( strpos( $string, 'TAX_' ) !== false ) {
 			$taxonomies = self::get_taxonomies_array( $string, $option );
 
 			return is_wp_error( $taxonomies ) ? array() : $taxonomies;
 		}
 
-		if ( strpos( $string, 'posts_' ) !== false ) {
+		if ( strpos( $string, 'POSTS_' ) !== false ) {
 			$posts = self::get_posts_array( $string, $option );
 
 			return is_wp_error( $posts ) ? array() : $posts;
 		}
 
-		if ( strpos( $string, 'time_zones' ) !== false ) {
+		if ( strpos( $string, 'TIME_ZONES' ) !== false ) {
 			return self::get_timezones_array();
 		}
 
-		if ( strpos( $string, 'user_roles' ) !== false ) {
+		if ( strpos( $string, 'USER_ROLES' ) !== false ) {
 			return self::get_user_roles_array();
 		}
 
