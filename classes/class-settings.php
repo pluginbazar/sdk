@@ -126,11 +126,11 @@ class Settings {
                 position: relative;
             }
 
-            #media_preview_<?php echo esc_attr( $option->field_id );; ?> > div:hover span {
+            #media_preview_<?php echo esc_attr( $option->field_id ); ?> > div:hover span {
                 display: block;
             }
 
-            #media_preview_<?php echo esc_attr( $option->field_id );; ?> > div > span {
+            #media_preview_<?php echo esc_attr( $option->field_id ); ?> > div > span {
                 display: none;
                 cursor: pointer;
                 background: #ddd;
@@ -143,7 +143,7 @@ class Settings {
                 color: #f443369c;
             }
 
-            #media_preview_<?php echo esc_attr( $option->field_id );; ?> > div > img {
+            #media_preview_<?php echo esc_attr( $option->field_id ); ?> > div > img {
                 width: 100%;
                 cursor: move;
             }

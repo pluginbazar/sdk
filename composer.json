@@ -2,8 +2,7 @@
   "name": "pluginbazar/sdk",
   "autoload": {
     "classmap": [
-      "classes/class-client.php",
-      "classes/class-notifications.php"
+      "classes/"
     ]
   }
 }
