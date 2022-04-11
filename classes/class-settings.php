@@ -636,6 +636,37 @@ class Settings {
 
 
 	/**
+	 * Generate Settings Fields
+	 *
+	 * @param array $field_options
+	 * @param bool|\WP_Post $post
+	 * @param array $args
+	 *
+	 * @return void
+	 */
+	function generate_fields( $field_options = array(), $post = false, $args = array() ) {
+
+		$this_post = get_post( $post );
+
+		if ( ! is_array( $field_options ) || ( $post && ! $this_post instanceof \WP_Post ) ) {
+			return;
+		}
+
+		foreach ( $field_options as $field_option ) {
+
+			$option_id = Utils::get_args_option( 'id', $field_option );
+
+			if ( $this_post ) {
+				$field_option['value']   = isset( $this_post->$option_id ) ? $this_post->$option_id : $this->client->utils()->get_meta( $option_id, $this_post->ID );
+				$field_option['post_id'] = $this_post->ID;
+			}
+
+			$this->field_generator( $field_option );
+		}
+	}
+
+
+	/**
 	 * Generate field automatically from $option
 	 *
 	 * @param $option_args
@@ -647,7 +678,17 @@ class Settings {
 		do_action( 'Pluginbazar/Settings/before_' . $option->id, $option );
 
 		if ( method_exists( $this, 'generate_' . $option->type ) && is_callable( array( $this, 'generate_' . $option->type ) ) ) {
-			call_user_func( array( $this, 'generate_' . $option->type ), $option );
+
+			if ( $option->is_external ) {
+
+				ob_start();
+				printf( '<label for="%s">%s</label>', $option->field_id, $option->title );
+				printf( '<div class="pb-sdk-field-inline pb-sdk-field-inputs">%s</div>', call_user_func( array( $this, 'generate_' . $option->type ), $option ) );
+
+				printf( '<div class="%s">%s</div>', $option->option_classes(), ob_get_clean() );
+			} else {
+				call_user_func( array( $this, 'generate_' . $option->type ), $option );
+			}
 		}
 
 		if ( $option->disabled ) {

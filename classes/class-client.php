@@ -23,6 +23,12 @@ class Client {
 	public $plugin_file = null;
 
 	/**
+	 * @var \Pluginbazar\Utils
+	 */
+	private static $utils;
+
+
+	/**
 	 * @var \Pluginbazar\Settings
 	 */
 	private static $settings;
@@ -53,6 +59,25 @@ class Client {
 		$this->plugin_version   = isset( $plugin_data['Version'] ) ? $plugin_data['Version'] : '';
 
 		add_action( 'admin_init', array( $this, 'manage_permanent_dismissible' ) );
+	}
+
+
+	/**
+	 * Return Utils class
+	 *
+	 * @return Utils
+	 */
+	public function utils() {
+
+		if ( ! class_exists( __NAMESPACE__ . '\Utils' ) ) {
+			require_once __DIR__ . '/class-utils.php';
+		}
+
+		if ( ! self::$utils ) {
+			self::$utils = new Utils( $this );
+		}
+
+		return self::$utils;
 	}
 
 
@@ -212,27 +237,7 @@ class Client {
 	}
 
 
-	/**
-	 * Return Arguments Value
-	 *
-	 * @param string $key
-	 * @param string $default
-	 * @param array $args
-	 *
-	 * @return mixed|string
-	 */
-	public function get_args_option( $key = '', $args = array(), $default = '' ) {
 
-		$default = is_array( $default ) && empty( $default ) ? array() : $default;
-		$default = ! is_array( $default ) && empty( $default ) ? '' : $default;
-		$key     = empty( $key ) ? '' : $key;
-
-		if ( isset( $args[ $key ] ) && ! empty( $args[ $key ] ) ) {
-			return $args[ $key ];
-		}
-
-		return $default;
-	}
 
 
 	/**

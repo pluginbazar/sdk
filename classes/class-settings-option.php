@@ -119,6 +119,12 @@ class Option {
 	 */
 	public $max = 100;
 
+	/**
+	 * @type bool
+	 * @var $is_external
+	 */
+	public $is_external = false;
+
 
 	/**
 	 * @param $option_data
@@ -137,6 +143,27 @@ class Option {
 		$this->field_id      = str_replace( array( '[', ']' ), '_', $this->id );
 		$this->field_name    = $this->multiple ? $this->id . '[]' : $this->id;
 		$this->field_options = preg_replace( '/"([^"]+)"\s*:\s*/', '$1:', json_encode( $this->field_options ) );
+	}
+
+
+	/**
+	 * Print option field classes
+	 *
+	 * @param $classes
+	 *
+	 * @return string
+	 */
+	function option_classes( $classes = '' ) {
+
+		// Added general class
+		$classes[] = 'pb-sdk-field';
+
+		// Added type to the class
+		$classes[] = $this->type;
+
+		$classes = apply_filters( 'Pluginbazar/Settings/Option/option_classes_arr', $classes );
+
+		return apply_filters( 'Pluginbazar/Settings/Option/option_classes', implode( ' ', array_unique( $classes ) ) );
 	}
 
 
