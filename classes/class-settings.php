@@ -721,7 +721,7 @@ class Settings {
 				$option_id    = Utils::get_args_option( 'id', $option_args );
 				$option_title = Utils::get_args_option( 'title', $option_args );
 
-				if ( ! empty( $option_id ) && ! empty( $option_title ) ) {
+				if ( ! empty( $option_id ) ) {
 					add_settings_field( $option_id, $option_title, array( $this, 'field_generator' ), $this->get_current_page(), $section_key, $option_args );
 				}
 			}
@@ -886,14 +886,14 @@ class Settings {
 	function add_menu_in_admin_menu() {
 
 		$menu_added = false;
-		$menu_title = $this->get( 'menu_title' );
+		$menu_name  = $this->get( 'menu_name' );
 
 		if ( 'main_menu' == $this->get( 'menu_type', 'main_menu' ) ) {
-			$menu_added = add_menu_page( $this->get( 'menu_name', $menu_title ), $menu_title, $this->get( 'capability' ), $this->get( 'menu_slug' ), array( $this, 'display_function' ), $this->get( 'menu_icon' ), $this->get( 'position' ) );
+			$menu_added = add_menu_page( $menu_name, $this->get( 'menu_title', $menu_name ), $this->get( 'capability' ), $this->get( 'menu_slug' ), array( $this, 'display_function' ), $this->get( 'menu_icon' ), $this->get( 'position' ) );
 		}
 
 		if ( 'sub_menu' == $this->get( 'menu_type', 'main_menu' ) ) {
-			$menu_added = add_submenu_page( $this->get( 'parent_slug' ), $this->get( 'menu_name', $menu_title ), $menu_title, $this->get( 'capability' ), $this->get( 'menu_slug' ), array( $this, 'display_function' ) );
+			$menu_added = add_submenu_page( $this->get( 'parent_slug' ), $menu_name, $this->get( 'menu_title', $menu_name ), $this->get( 'capability' ), $this->get( 'menu_slug' ), array( $this, 'display_function' ) );
 		}
 
 		do_action( 'Pluginbazar/Settings/menu_added_' . $this->get( 'menu_slug' ), $menu_added );
