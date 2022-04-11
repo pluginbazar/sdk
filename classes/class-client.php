@@ -2,7 +2,6 @@
 /**
  * Pluginbazar SDK Client
  *
- * @version 1.0.7
  * @author Pluginbazar
  */
 
