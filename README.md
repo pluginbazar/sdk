@@ -2,6 +2,9 @@
 
 This tool will allow your plugin development more awesome.
 
+## VERSION
+1.0.5
+
 ## FEATURES
 
 Here is a list of features of this SDK.
