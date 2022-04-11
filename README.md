@@ -3,7 +3,7 @@
 This tool will allow your plugin development more awesome.
 
 ## VERSION
-1.0.5
+Stable Tag: **1.0.5**
 
 ## FEATURES
 
