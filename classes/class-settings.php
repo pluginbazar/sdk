@@ -536,8 +536,6 @@ class Settings {
 		$items = array();
 		$value = $option->get_value( array() );
 
-		ob_start();
-
 		foreach ( $option->args as $key => $label ) {
 
 			$checked = is_array( $value ) && in_array( $key, $value ) ? "checked" : "";
@@ -720,8 +718,8 @@ class Settings {
 
 			foreach ( $setting['options'] as $option_args ) {
 
-				$option_id    = $this->client->get_args_option( 'id', $option_args );
-				$option_title = $this->client->get_args_option( 'title', $option_args );
+				$option_id    = Utils::get_args_option( 'id', $option_args );
+				$option_title = Utils::get_args_option( 'title', $option_args );
 
 				if ( ! empty( $option_id ) && ! empty( $option_title ) ) {
 					add_settings_field( $option_id, $option_title, array( $this, 'field_generator' ), $this->get_current_page(), $section_key, $option_args );
@@ -756,7 +754,7 @@ class Settings {
 
 		$settings_for_page = empty( $settings_for_page ) ? $this->get_current_page() : $settings_for_page;
 
-		return $this->client->get_args_option( 'page_settings', $this->get_pages()[ $settings_for_page ], array() );
+		return Utils::get_args_option( 'page_settings', $this->get_pages()[ $settings_for_page ], array() );
 	}
 
 
@@ -776,7 +774,7 @@ class Settings {
 		$current_page_name = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : $default_tab;
 
 		if ( ! empty( $ret ) ) {
-			$current_page = $this->client->get_args_option( $current_page_name, $all_pages );
+			$current_page = Utils::get_args_option( $current_page_name, $all_pages );
 
 			return isset( $current_page[ $ret ] ) ? $current_page[ $ret ] : $default;
 		}
@@ -795,9 +793,9 @@ class Settings {
 	function allowed_options( $allowed_options ) {
 
 		foreach ( $this->get_pages() as $page_id => $page ) :
-			foreach ( $this->client->get_args_option( 'page_settings', $page, array() ) as $section ):
-				foreach ( $this->client->get_args_option( 'options', $section, array() ) as $option ):
-					$option_id = $this->client->get_args_option( 'id', $option );
+			foreach ( Utils::get_args_option( 'page_settings', $page, array() ) as $section ):
+				foreach ( Utils::get_args_option( 'options', $section, array() ) as $option ):
+					$option_id = Utils::get_args_option( 'id', $option );
 					if ( ! empty( $option_id ) ) {
 						$allowed_options[ $page_id ][] = $option_id;
 					}
@@ -862,7 +860,7 @@ class Settings {
 
 		ob_start();
 
-		printf( '<h2>%s - %s</h2><br>', $this->get( 'page_title', $this->get( 'menu_title' ) ), $this->get_current_page( 'page_nav' ) );
+		printf( '<h2>%s - %s</h2><br>', $this->get( 'page_title', $this->client->plugin_name ), $this->get_current_page( 'page_nav' ) );
 
 		settings_errors();
 
@@ -888,13 +886,14 @@ class Settings {
 	function add_menu_in_admin_menu() {
 
 		$menu_added = false;
+		$menu_title = $this->get( 'menu_title' );
 
 		if ( 'main_menu' == $this->get( 'menu_type', 'main_menu' ) ) {
-			$menu_added = add_menu_page( $this->get( 'menu_name' ), $this->get( 'menu_title' ), $this->get( 'capability' ), $this->get( 'menu_slug' ), array( $this, 'display_function' ), $this->get( 'menu_icon' ), $this->get( 'position' ) );
+			$menu_added = add_menu_page( $this->get( 'menu_name', $menu_title ), $menu_title, $this->get( 'capability' ), $this->get( 'menu_slug' ), array( $this, 'display_function' ), $this->get( 'menu_icon' ), $this->get( 'position' ) );
 		}
 
 		if ( 'sub_menu' == $this->get( 'menu_type', 'main_menu' ) ) {
-			$menu_added = add_submenu_page( $this->get( 'parent_slug' ), $this->get( 'menu_name' ), $this->get( 'menu_title' ), $this->get( 'capability' ), $this->get( 'menu_slug' ), array( $this, 'display_function' ) );
+			$menu_added = add_submenu_page( $this->get( 'parent_slug' ), $this->get( 'menu_name', $menu_title ), $menu_title, $this->get( 'capability' ), $this->get( 'menu_slug' ), array( $this, 'display_function' ) );
 		}
 
 		do_action( 'Pluginbazar/Settings/menu_added_' . $this->get( 'menu_slug' ), $menu_added );
@@ -908,7 +907,7 @@ class Settings {
 	 */
 	private function get_pages() {
 
-		$pages     = $this->client->get_args_option( 'pages', $this->data, array() );
+		$pages     = Utils::get_args_option( 'pages', $this->data, array() );
 		$sorted    = array();
 		$increment = 0;
 
@@ -947,7 +946,7 @@ class Settings {
 	 * @return bool
 	 */
 	private function add_in_menu() {
-		return $this->client->get_args_option( 'add_in_menu', $this->data );
+		return Utils::get_args_option( 'add_in_menu', $this->data, true );
 	}
 
 
@@ -957,7 +956,7 @@ class Settings {
 	 * @return mixed|string
 	 */
 	function get_disabled_notice() {
-		return $this->client->get_args_option( 'disabled_notice', $this->data, $this->client->__trans( 'This option is disabled' ) );
+		return Utils::get_args_option( 'disabled_notice', $this->data, $this->client->__trans( 'This option is disabled' ) );
 	}
 
 
@@ -1176,6 +1175,6 @@ class Settings {
 	 * @return array|mixed|string
 	 */
 	protected function get( $key = '', $default = '' ) {
-		return $this->client->get_args_option( $key, $this->data, $default );
+		return Utils::get_args_option( $key, $this->data, $default );
 	}
 }

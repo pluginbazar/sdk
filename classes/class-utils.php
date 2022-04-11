@@ -56,9 +56,9 @@ class Utils {
 			return;
 		}
 
-		$singular = $this->client->get_args_option( 'singular', $args, '' );
-		$plural   = $this->client->get_args_option( 'plural', $args, '' );
-		$labels   = $this->client->get_args_option( 'labels', $args, array() );
+		$singular = Utils::get_args_option( 'singular', $args, '' );
+		$plural   = Utils::get_args_option( 'plural', $args, '' );
+		$labels   = Utils::get_args_option( 'labels', $args, array() );
 
 		$args = wp_parse_args( $args,
 			array(
@@ -113,9 +113,9 @@ class Utils {
 			return;
 		}
 
-		$singular = $this->client->get_args_option( 'singular', $args, '' );
-		$plural   = $this->client->get_args_option( 'plural', $args, '' );
-		$labels   = $this->client->get_args_option( 'labels', $args, array() );
+		$singular = Utils::get_args_option( 'singular', $args, '' );
+		$plural   = Utils::get_args_option( 'plural', $args, '' );
+		$labels   = Utils::get_args_option( 'labels', $args, array() );
 
 		$args = wp_parse_args( $args,
 			array(

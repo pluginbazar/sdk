@@ -126,7 +126,7 @@ class Client {
 
 		$query_args = wp_unslash( $_GET );
 
-		if ( $this->get_args_option( 'pb_action', $query_args ) == 'permanent_dismissible' && ! empty( $id = $this->get_args_option( 'id', $query_args ) ) ) {
+		if ( Utils::get_args_option( 'pb_action', $query_args ) == 'permanent_dismissible' && ! empty( $id = Utils::get_args_option( 'id', $query_args ) ) ) {
 
 			// update value
 			update_option( $this->get_notices_id( $id ), time() );
@@ -235,9 +235,6 @@ class Client {
 			<?php
 		}
 	}
-
-
-
 
 
 	/**
