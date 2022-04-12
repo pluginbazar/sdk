@@ -673,7 +673,7 @@ class Settings {
 
 		$option = new Option( $option_args );
 
-		do_action( 'Pluginbazar/Settings/before_' . $option->id, $option );
+		do_action( 'Pluginbazar/Settings/Option/before_' . $option->id, $option );
 
 		if ( method_exists( $this, 'generate_' . $option->type ) && is_callable( array( $this, 'generate_' . $option->type ) ) ) {
 
@@ -693,17 +693,11 @@ class Settings {
 			printf( '<span class="disabled-notice" style="background: #ffe390eb;margin-left: 10px;padding: 5px 12px;font-size: 12px;border-radius: 3px;color: #717171;">%s</span>', $this->get_disabled_notice() );
 		}
 
-		do_action( 'Pluginbazar/Settings/before_option', $option );
-
-		do_action( 'Pluginbazar/Settings/settings_' . $option->id, $option );
-
 		if ( ! empty( $option->details ) ) {
 			printf( '<p class="description">%s</p>', $option->details );
 		}
 
-		do_action( 'Pluginbazar/Settings/after_option', $option );
-
-		do_action( 'Pluginbazar/Settings/after_' . $option->id, $option );
+		do_action( 'Pluginbazar/Settings/Option/after_' . $option->id, $option );
 	}
 
 
@@ -864,7 +858,7 @@ class Settings {
 
 		settings_errors();
 
-		do_action( 'Pluginbazar/Settings/before_setting_page_' . $this->get_current_page(), $this );
+		do_action( 'Pluginbazar/Settings/Page/before_' . $this->get_current_page(), $this );
 
 		$this->get_settings_nav_tabs();
 
@@ -874,7 +868,7 @@ class Settings {
 			print( $this->get_setting_fields_html() );
 		}
 
-		do_action( 'Pluginbazar/Settings/after_setting_page_' . $this->get_current_page(), $this );
+		do_action( 'Pluginbazar/Settings/Page/after_' . $this->get_current_page(), $this );
 
 		printf( '<div class="wrap">%s</div>', ob_get_clean() );
 	}
@@ -896,7 +890,7 @@ class Settings {
 			$menu_added = add_submenu_page( $this->get( 'parent_slug' ), $menu_name, $this->get( 'menu_title', $menu_name ), $this->get( 'capability' ), $this->get( 'menu_slug' ), array( $this, 'display_function' ) );
 		}
 
-		do_action( 'Pluginbazar/Settings/menu_added_' . $this->get( 'menu_slug' ), $menu_added );
+		do_action( 'Pluginbazar/Settings/Menu/after_' . $this->get( 'menu_slug' ), $menu_added );
 	}
 
 
