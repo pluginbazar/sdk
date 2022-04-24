@@ -539,7 +539,7 @@ class Settings {
 		foreach ( $option->args as $key => $label ) {
 
 			$checked = is_array( $value ) && in_array( $key, $value ) ? "checked" : "";
-			$items[] = sprintf( '<label for="%2$s-%3$s"><input %4$s %5$s type="radio" id="%2$s-%3$s" name="%1$s[]" value="%2$s">%6$s</label>',
+			$items[] = sprintf( '<label for="%2$s-%3$s"><input %4$s %5$s type="radio" id="%2$s-%3$s" name="%1$s[]" value="%3$s">%6$s</label>',
 				$option->id, $option->field_id, $key, $option->get_is_disabled(), $checked, $label
 			);
 		}
